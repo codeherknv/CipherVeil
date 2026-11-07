@@ -21,7 +21,12 @@ import {
   MultimodalCompareResponse,
 } from './types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+// Normalize API base URL: ensure /api suffix is present when an external host is supplied
+let rawBase = import.meta.env.VITE_API_BASE_URL || '/api';
+if (rawBase.startsWith('http') && !rawBase.endsWith('/api') && !rawBase.endsWith('/api/')) {
+  rawBase = rawBase.replace(/\/+$/, '') + '/api';
+}
+const API_BASE_URL = rawBase;
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
