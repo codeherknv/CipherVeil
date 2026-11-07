@@ -1,4 +1,4 @@
-# Adaptive Multimodal Steganography Workbench
+# CipherVeil-Adaptive Multimodal Steganography Workbench
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
