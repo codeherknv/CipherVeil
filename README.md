@@ -1,137 +1,263 @@
-# Reliability-Aware Adaptive Multimodal Steganography
+# Adaptive Multimodal Steganography Workbench
 
-Research platform for adaptive payload allocation and machine-learning-based steganalysis across image, audio, and video carrier media.
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
+[![React 18](https://img.shields.io/badge/frontend-React%2018%20%7C%20TypeScript-61DAFB.svg)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/build-Vite-646CFF.svg)](https://vitejs.dev/)
+[![Tests](https://img.shields.io/badge/tests-251%20passing-brightgreen.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## Project Structure
-- `backend/`: FastAPI Python backend powering the research engine, cryptography, codec, and steganalysis.
-- `frontend/`: React + TypeScript + Vite + Tailwind CSS dashboard.
-- `docs/`: Academic documentation, architecture diagrams, methodology, and literature review.
-- `data/`: Sample cover and stego media datasets.
-- `outputs/`: Generated carrier files and intermediate artifacts.
-- `results/`: Benchmarks and evaluation results (CSV exports, metric summaries).
+An enterprise-grade, cross-modal steganographic framework that distributes encrypted payloads across heterogeneous carrier media (**Image**, **Audio**, and **Video**) using mathematical portfolio theory and convex optimization.
 
----
-
-## Current Status: Phase 7 Implemented & Verified
-
-### Implemented Modules:
-1. **Infrastructure & Monorepo (Phase 1)**: FastAPI application, Vite dev proxy, Pydantic configuration, dark minimal research workbench.
-2. **Authenticated Encryption (Phase 2)**: AES-256-GCM with fresh 96-bit nonces, 128-bit authentication tags, PBKDF2-HMAC-SHA256 key derivation, and versioned binary envelope framing (`ENVELOPE_VERSION = 1`).
-3. **Versioned Binary Payload Codec (Phase 2)**: Fixed 34-byte packet header (`b"ASTG"`), UUID4 message identifiers, CRC32 checksums, chunk splitting (equal or capacity-based), and order-independent reassembly.
-4. **Spatial LSB Image Steganography (Phase 3)**: Lossless PNG carrier embedding/extraction with 14-byte binary framing (`b"PSTG"`), CRC32 integrity verification, RGBA alpha-channel preservation, and distortion metrics (MSE, PSNR, SSIM).
-5. **PCM WAV Audio Steganography (Phase 4)**: Uncompressed 16-bit and 8-bit PCM WAV sample LSB embedding/extraction with 14-byte binary framing (`b"WSTG"`), interleaved multi-channel preservation (mono & stereo), audio header/duration preservation, and distortion metrics (normalized MSE, SNR in dB).
-6. **Frame-Based Video Steganography (Phase 5)**: Multi-frame spatial LSB embedding/extraction across video frames using OpenCV and lossless codecs (FFV1 in AVI/MKV), 14-byte binary framing (`b"VSTG"`), video parameter preservation (resolution, FPS, frame count), and distortion metrics (average frame MSE, average frame PSNR).
-7. **Unified Multimodal Allocation & Orchestration (Phase 6)**:
-   - Carrier profiling (`profiler.py`): Measures Laplacian variance, RMS acoustic energy, and inter-frame temporal difference variance.
-   - Allocation policies (`allocator.py`): Fixed baseline (equal split + water-filling) and adaptive feature-weighted rate-distortion strategy.
-   - Unified orchestration (`engine.py`): Partitions encrypted envelope across PNG, WAV, and AVI carriers, packages bundle into a ZIP archive with non-secret manifest, and reassembles/decrypts from either ZIP or individual carriers.
-8. **ML-Based Steganalysis & Detectability Evaluation (Phase 7)**:
-   - Statistical feature extractors (`features.py`): 10 image features (LSB 1-ratio, Pairs-of-Values asymmetry, horizontal/vertical difference variance, kurtosis, Laplacian high-pass residual, LSB flip rate, cross-channel differences); 8 audio features (LSB ratio, sample PoV asymmetry, 1st/2nd difference variance & kurtosis, high-band spectral ratio, RMS energy); 7 video features (frame LSB ratio, inter-frame difference variance & kurtosis, inter-frame LSB flip rate, spatial difference variance).
-   - Labeled benchmark dataset generator (`dataset_generator.py`): Procedural synthesizers for Image, Audio, and Video covers, paired with stego variants across Low, Medium, and High payload densities and Fixed/Adaptive strategies. Strict `source_id` tagging ensures zero data leakage. Zero secret leakage: no keys or plaintexts in feature sets.
-   - Leak-free training engine (`trainer.py`): `GroupShuffleSplit` on `source_id` guarantees that a cover and all its stego variants never cross train/test splits. `StandardScaler` is fitted strictly on `X_train`. Trains explainable Random Forest and Logistic Regression baselines.
-   - Single-file live inference classifier (`classifier.py`): Inspects uploaded media, automatically detects modality (PNG, WAV, AVI), calculates stego probability, and provides honest scientific disclaimers.
-   - Interactive Steganalysis UI tab (`Steganalysis.tsx`): 3 sub-views for Live Carrier Inspection, Detector Training & Evaluation, and Dataset Exploration.
-9. **Multimodal Triad Workbench**: Full-featured React workbench for 3-carrier profiling, strategy comparison, bundle download, and unified extraction.
+Unlike conventional single-media steganography, this system addresses the **Multimodal Trilemma** (Capacity vs. Distortion vs. Risk Concentration) by modeling payload allocation as a constrained quadratic optimization problem inspired by Markowitz Modern Portfolio Theory.
 
 ---
 
-## Supported Media Formats & Codecs
+## 📑 Complete Academic Project Report
 
-| Carrier Type | Supported Formats | Recommended Codec / Specification | Framing Signature | Lossless Guarantee |
-|---|---|---|---|---|
-| **Image** | PNG (`.png`) | Lossless Deflate RGB / RGBA | `b"PSTG"` (14 bytes) | Bit-exact recovery |
-| **Audio** | WAV (`.wav`) | Linear PCM 16-bit / 8-bit, Mono / Stereo | `b"WSTG"` (14 bytes) | Bit-exact recovery |
-| **Video** | AVI (`.avi`), MKV (`.mkv`) | FFV1 (RFC 9043) / HFYU (HuffYUV) | `b"VSTG"` (14 bytes) | Bit-exact recovery |
-
-> [!IMPORTANT]
-> **Video Codec Limitations & Research Note**: Lossy video codecs (such as H.264/AVC, H.265/HEVC, VP9, or MPEG-4) employ lossy discrete cosine transform (DCT) quantization, motion compensation residuals, and chroma subsampling that alter pixel values and completely destroy spatial LSB modifications. The video engine strictly enforces lossless encoding (FFV1 or HuffYUV) to guarantee mathematical bit-level recovery. Average frame MSE and PSNR measure spatial fidelity relative to the cover; they do **not** guarantee invisibility or prove resistance to statistical or machine-learning video steganalysis.
+For a complete, publication-grade academic analysis (25 pages) including complete mathematical derivations, signal complexity formulas, full 144-trial benchmark tables, lossy codec stress tests, full-stack architecture, and professor defense scripts, refer to:
+👉 **[`Adaptive_Multimodal_Steganography_Complete_Project_Report.pdf`](Adaptive_Multimodal_Steganography_Complete_Project_Report.pdf)**
 
 ---
 
-## Quick Start
+## 🌟 Key Innovations & Capabilities
 
-### 1. Running the Backend Server
-```powershell
+- **Multimodal Triad Engine:** Deconstructs, embeds, and reconstructs payloads across Image (PNG/BMP), Audio (WAV 16-bit PCM), and Video (MP4/AVI raw frames) carriers simultaneously.
+- **Defense-in-Depth Cryptography:**
+  - **Authenticated Encryption:** ChaCha20-Poly1305 AEAD with fresh 96-bit nonces.
+  - **Key Derivation:** HKDF-SHA256 with 256-bit cryptographically secure salts.
+  - **Error Correction:** Reed-Solomon $(N, K)$ forward error correction framing.
+  - **Secret Sharing:** Shamir's $(k, n)$ threshold secret sharing for cryptographic share isolation.
+- **Signal-Adaptive Complexity Profiling:**
+  - **Image:** Sobel gradient magnitude, Laplacian edge variance, and GLCM texture homogeneity.
+  - **Audio:** Spectral entropy and Zero-Crossing Rate (ZCR).
+  - **Video:** Temporal inter-frame motion differential (MSE) and spatial macroblock variance.
+- **8 Mathematical Allocation Paradigms:** Supports baseline, heuristic, theoretical, and convex optimization strategies.
+- **Exact Integer Conservation Engine:** Guarantees $\sum b_i = B$ with zero capacity violations via Bound Clamping and Largest Remainder Rounding.
+- **Interactive Multi-Strategy Comparison Matrix:** Live real-time benchmarking panel evaluating all 8 strategies simultaneously on user carriers with automatic concentration warnings.
+- **Rigorous 144-Trial Benchmark Evaluation:** Evaluated across 4 operational scenarios with independent $\chi^2$ detectability testing and lossy codec stress-testing.
+
+---
+
+## 📐 The 8 Allocation Paradigms
+
+| # | Strategy | Paradigm | Description |
+|---|---|---|---|
+| 1 | **Fixed Baseline** | Uniform | Equal distribution with capacity water-filling. |
+| 2 | **Capacity-Proportional** | Linear Heuristic | Allocates bits strictly proportional to available capacity ($b_i \propto C_i$). |
+| 3 | **Adaptive** | Signal-Weighted | Jointly weights carrier capacity and signal entropy/complexity. |
+| 4 | **Square-Root-Law** | Asymptotic Steganography | Allocates proportional to Ker's square root of capacity ($b_i \propto \sqrt{C_i}$). |
+| 5 | **Random Key-Seeded** | Stochastic | Cryptographic PRNG split (seeded by message key) respecting capacities. |
+| 6 | **Max-Complexity Greedy** | Greedy Heuristic | Saturates highest-complexity carriers first to maximize edge masking. |
+| 7 | **Minimax Risk** | Conservative Optimization | Minimizes the worst-case carrier risk: $\min_{\mathbf{b}} \max_i (\sigma_i^2 b_i^2)$. |
+| 8 | **Portfolio (Markowitz)** | Convex Optimization (QP) | Solves mean-variance trade-off via Sequential Least Squares Programming (SLSQP). |
+
+### Mathematical Formulation of Portfolio Allocation
+
+The Markowitz payload allocation solves the following bounded quadratic program:
+
+$$\min_{\mathbf{b}} \quad \frac{1}{2} \mathbf{b}^T \boldsymbol{\Sigma} \mathbf{b} - \lambda \mathbf{w}^T \mathbf{b}$$
+
+$$\text{subject to} \quad \sum_{i=1}^3 b_i = B, \quad 0 \le b_i \le C_i \quad \forall i \in \{I, A, V\}$$
+
+- $\mathbf{b} = [b_I, b_A, b_V]^T$: Allocated payload bytes across Image, Audio, and Video.
+- $\boldsymbol{\Sigma}$: Risk covariance matrix capturing carrier vulnerability, noise covariance, and cross-carrier correlations.
+- $\mathbf{w}$: Normalized capacity/complexity utility vector.
+- $\lambda \in [0, 1]$: Risk-tolerance parameter controlling the trade-off along the Efficient Frontier.
+
+---
+
+## 📊 Empirical Evaluation & Benchmark Results
+
+Evaluated across **144 systematic trials** over 4 operational scenarios (*Balanced*, *Image-Dominant*, *Audio-Dominant*, *Video-Dominant*):
+
+```
+                        EFFICIENT FRONTIER (Risk vs. Throughput)
+   Modeled Risk Proxy (b^T Σ b)
+        ▲
+   High │  [λ=1.00 Capacity-Proportional Target]
+        │         •
+        │          •
+        │            • [λ=0.50 Balanced Portfolio]
+        │              •
+    Low │                • [λ=0.00 Minimum Variance]
+        └────────────────────────────────────────► Capacity-Weighted Throughput (w^T b)
+```
+
+### Key Findings
+1. **Markowitz Optimization ($\lambda=0.50$):** Consistently balances imperceptibility across modalities, achieving $>53\text{ dB}$ Image PSNR, $>54\text{ dB}$ Audio SNR, and $>58\text{ dB}$ Video PSNR under typical loads.
+2. **Independent Detectability:** Evaluated via image $\chi^2$ statistical analysis ($p$-values $>0.999$, indicating low first-order statistical anomaly).
+3. **Operational Risks of Heuristics:**
+   - *Max-Complexity Greedy* and *Random Key-Seeded* frequently exceed the $>90\%$ concentration threshold, creating severe detection hotspots in a single carrier.
+   - *Capacity-Proportional* serves as a strong, predictable baseline for large homogeneous channels.
+4. **Channel Robustness Testing:** Lossy re-compression (JPEG $Q=75$, MP3 $128\text{ kbps}$, H.264 $\text{CRF}=23$) degrades LSB spatial carriers ($\text{BER} \approx 45\text{--}50\%$). The ChaCha20-Poly1305 MAC tag detects tamper/corruption and cleanly refuses decryption of corrupted data.
+
+---
+
+## 🏗️ System Architecture
+
+```
+                                 +-----------------------+
+                                 | Secret Message Input  |
+                                 +-----------+-----------+
+                                             |
+                                    [HKDF-SHA256 / AES]
+                                             v
+                              +-----------------------------+
+                              |   ChaCha20-Poly1305 AEAD    |
+                              |   + Reed-Solomon Framing   |
+                              +--------------+--------------+
+                                             |
+                 +---------------------------+---------------------------+
+                 | (Carrier Analysis)                                    |
+                 v                                                       v
++---------------------------------+                     +---------------------------------+
+|      Carrier Triad Upload       |                     |   Mathematical Strategy Selector|
+|  - Image: Sobel / GLCM Entropy  |                     |  - 8 Strategies (Fixed -> QP)   |
+|  - Audio: Spectral Entropy / ZCR|                     |  - Exact Integer Conservation   |
+|  - Video: Temporal Motion MSE   |                     |  - SLSQP Convex Optimizer       |
++----------------+----------------+                     +----------------+----------------+
+                 |                                                       |
+                 +---------------------------+---------------------------+
+                                             v
+                              +-----------------------------+
+                              |   Payload Allocation Vector |
+                              |      b = [b_I, b_A, b_V]    |
+                              +--------------+--------------+
+                                             |
+                 +---------------------------+---------------------------+
+                 | (Adaptive LSB Embedding)  |                           |
+                 v                           v                           v
+        +-----------------+         +-----------------+         +-----------------+
+        |   Stego Image   |         |   Stego Audio   |         |   Stego Video   |
+        |  (PNG / BMP)    |         |  (WAV 16-bit)   |         |   (MP4 / AVI)   |
+        +-----------------+         +-----------------+         +-----------------+
+```
+
+---
+
+## 💻 Tech Stack
+
+- **Backend:** Python 3.10+, FastAPI, NumPy, SciPy (SLSQP optimization), OpenCV, SoundFile, Cryptography, Reed-Solomon.
+- **Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Lucide React, Recharts (interactive comparative charts & radar).
+- **Testing & Verification:** Pytest (**251 passing unit and integration tests**).
+
+---
+
+## 🚀 Quick Start Guide
+
+### Prerequisites
+- Python 3.10+
+- Node.js 18+ and npm
+- (Optional) Google Chrome installed (for automated PDF report generation)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/codeherknv/Adaptive-Multimodal-Steganography.git
+cd Adaptive-Multimodal-Steganography
+```
+
+### 2. Backend Setup
+```bash
+# Navigate to backend and create virtual environment
 cd backend
+python -m venv venv
+
+# Activate virtual environment
+# Windows (PowerShell):
 .\venv\Scripts\Activate.ps1
-python -m uvicorn app.main:app --reload --port 8000
+# Linux/macOS:
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run test suite to verify installation (251 tests)
+pytest tests/ -v
+
+# Start FastAPI server (runs on http://localhost:8000)
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 - Interactive API Documentation (Swagger UI): `http://127.0.0.1:8000/docs`
 - Health check: `http://127.0.0.1:8000/api/health`
-- Implementation status: `http://127.0.0.1:8000/api/status`
 
-### 2. Running Automated Tests
-```powershell
-cd backend
-.\venv\Scripts\pytest -v
-```
-Currently passes **162 automated tests** (API integration, AES-GCM cryptography, binary payload codec, PNG LSB steganography, PCM WAV audio steganography, video frame steganography, carrier profiling, fixed & adaptive allocation, multimodal orchestration, and ML steganalysis pipelines).
-
-### 3. Running the Frontend Development Server
-```powershell
+### 3. Frontend Setup
+```bash
+# In a new terminal, navigate to frontend
 cd frontend
+
+# Install dependencies
+npm install
+
+# Start Vite development server (runs on http://localhost:5173)
 npm run dev
 ```
-Development dashboard: `http://localhost:5173`
+
+Open your browser and navigate to `http://localhost:5173`.
 
 ---
 
-## API Examples
+## 🧪 Running the Benchmark Suite
 
-### 1. Encrypt a Message (`POST /api/crypto/encrypt`)
+To reproduce the 144-trial evaluation matrix and generate the analytical charts:
+
 ```powershell
-Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/crypto/encrypt" -Method Post -ContentType "application/json" -Body '{
-  "plaintext": "Secret message to be split across carriers",
-  "encoding": "base64"
-}'
+# From the project root with the backend venv active:
+$env:PYTHONPATH='backend'
+python scripts/run_phase10_benchmarks.py
 ```
 
-### 2. Generate Steganalysis Dataset (`POST /api/steganalysis/dataset/generate`)
-```powershell
-curl -X POST "http://127.0.0.1:8000/api/steganalysis/dataset/generate" \
-  -H "Content-Type: application/json" \
-  -d '{"modality": "image", "num_sources": 10, "payload_fractions": [0.10, 0.35, 0.55]}'
+Generated plots will be saved in `results/figures/`:
+- `phase10_efficient_frontier.png`
+- `phase10_rate_distortion_curves.png`
+- `phase10_allocation_shares.png`
+- `phase10_detectability_comparison.png`
+- `phase10_ablation_study.png`
+
+---
+
+## 📁 Repository Structure
+
+```text
+├── Adaptive_Multimodal_Steganography_Complete_Project_Report.pdf  # 25-page comprehensive academic PDF report
+├── backend/
+│   ├── app/
+│   │   ├── api/routes.py                # FastAPI REST endpoints (including /api/multimodal/compare)
+│   │   ├── core/
+│   │   │   ├── allocator.py             # 8 Allocation strategies & integer conservation
+│   │   │   ├── crypto.py                # ChaCha20-Poly1305, HKDF, Reed-Solomon
+│   │   │   ├── profiler.py              # Spatial, spectral, and temporal feature extraction
+│   │   │   ├── engine.py                # Multimodal Triad orchestrator
+│   │   │   ├── image_stego.py           # Spatial LSB image embedding & extraction
+│   │   │   ├── audio_stego.py           # Linear PCM WAV sample LSB embedding
+│   │   │   └── video_stego.py           # Multi-frame spatial LSB embedding
+│   │   └── schemas.py                   # Pydantic v2 schemas
+│   ├── tests/                           # 251 Pytest test suite
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── pages/MultimodalTriad.tsx    # 8-Card strategy selector UI & embed/extract workflow
+│   │   ├── components/
+│   │   │   └── StrategyComparisonPanel.tsx # Live 8-strategy comparison table & Recharts
+│   └── package.json
+├── results/
+│   ├── figures/                         # High-res benchmark plots
+│   ├── phase10_benchmark_report.md      # 144-trial evaluation report
+│   └── phase10_benchmark_summary.csv    # Raw benchmark trial data
+└── scripts/
+    └── run_phase10_benchmarks.py        # Benchmark automation script
 ```
 
-### 3. Train ML Steganalyzer (`POST /api/steganalysis/train`)
-```powershell
-curl -X POST "http://127.0.0.1:8000/api/steganalysis/train" \
-  -H "Content-Type: application/json" \
-  -d '{"modality": "image", "model_type": "random_forest", "test_size": 0.30}'
-```
+---
 
-### 4. Inspect Media for Steganography (`POST /api/steganalysis/classify`)
-```powershell
-curl -X POST "http://127.0.0.1:8000/api/steganalysis/classify" \
-  -F "file=@suspect_image.png" \
-  -F "model_type=random_forest"
-```
+## ⚖️ Scientific Integrity & Limitations
 
-### 5. Check Video Capacity (`POST /api/video/capacity`)
-```powershell
-curl -X POST "http://127.0.0.1:8000/api/video/capacity" -F "video=@sample_cover.avi"
-```
+- **Modeled Risk Proxy:** The metric $\mathbf{b}^T \boldsymbol{\Sigma} \mathbf{b}$ represents the optimizer's internal quadratic loss objective based on spatial/spectral complexity, not an empirical neural network detectability score.
+- **Detector Scope:** Independent empirical detectability testing was conducted using image $\chi^2$ sample analysis. Deep learning-based steganalyzers (e.g., SRNet) are not included in this release.
+- **Channel Vulnerability:** LSB spatial embedding is designed for lossless channels; distribution over lossy channels (e.g., social media re-compression) requires frequency-domain embedding (DCT/DWT).
 
-### 6. Embed Encrypted Envelope in Video (`POST /api/video/embed`)
-```powershell
-curl -X POST "http://127.0.0.1:8000/api/video/embed" \
-  -F "video=@sample_cover.avi" \
-  -F "envelope=<ENVELOPE_BASE64_STRING>" \
-  -F "encoding=base64"
-```
+---
 
-### 7. Extract Envelope from Stego Video (`POST /api/video/extract`)
-```powershell
-curl -X POST "http://127.0.0.1:8000/api/video/extract" \
-  -F "video=@stego_output.avi" \
-  -F "encoding=base64"
-```
+## 📜 License
 
-### 8. Decrypt a Message (`POST /api/crypto/decrypt`)
-```powershell
-Invoke-RestMethod -Uri "http://127.0.0.1:8000/api/crypto/decrypt" -Method Post -ContentType "application/json" -Body '{
-  "envelope": "<ENVELOPE_STRING>",
-  "key": "<KEY_STRING>",
-  "encoding": "base64"
-}'
-```
+This project is open-source and licensed under the [MIT License](LICENSE).
